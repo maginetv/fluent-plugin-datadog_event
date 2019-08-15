@@ -56,11 +56,11 @@ Tag values can be used for configuration, leading to a config style such as:
 <match ddevents.**>
   type datadog_event
   api_key yOuraPIKeyaaAAAAaA
-  tags fluentevent
-  alert_type $tag_parts[2]
-  aggregation_key $tag_parts[1]
-  msg_title "App event: ${tag_parts[1]}"
-  source_type_name "fluent-${tag_parts[1])"
+  tags backend,alert,${tag[2]}
+  alert_type error
+  aggregation_key "my_aggregation_key"
+  msg_title "App event: ${tag[1]}"
+  source_type_name "fluent-${tag[0])"
 </match>
 ```
 
