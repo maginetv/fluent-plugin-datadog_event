@@ -47,12 +47,14 @@ module Fluent::Plugin
     end
 
     def write(chunk)
+        msg_title = extract_placeholders(@msg_title, chunk)
+        tags = extract_placeholders(@tags, chunk)
         chunk.each do |time, record|
-            post_event(time, "record", record)
+            post_event(time, "record", record, msg_title, tags)
         end
     end
 
-    def post_event(time, event_key, record)
+    def post_event(time, event_key, record, msg_title, tags)
         host = @host
         if !host
             host = record["host"]
@@ -60,11 +62,11 @@ module Fluent::Plugin
 
         res = @dog.emit_event(Dogapi::Event.new(
             "#{record}",
-            :msg_title => @msg_title,
+            :msg_title => msg_title,
             :date_happend => time,
             :priority => @priority,
             :host => host,
-            :tags => @tags,
+            :tags => tags,
             :alert_type => @alert_type,
             :aggregation_key => @aggregation_key,
             :source_type_name => @source_type_name
