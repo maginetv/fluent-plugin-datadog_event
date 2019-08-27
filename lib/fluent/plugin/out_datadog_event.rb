@@ -60,6 +60,31 @@ module Fluent::Plugin
             host = record["host"]
         end
 
+        # If log_level field exists, map that to the alert_type
+        # otherwise default it to info. If alert_type was set to success
+        # ignore log_level logic.
+        alert_type = @alert_type
+        if alert_type != "success"
+            log_level = record["log_level"]
+            unless log_level.nil?
+                log_level = log_level.downcase
+                case log_level
+                when "error"
+                    alert_type = "error"
+                when "info"
+                    alert_type = "info"
+                when "warn"
+                    alert_type = "warning"
+                when "warning"
+                    alert_type = "warning"
+                when "severe"
+                    alert_type = "error"
+                else
+                    alert_type = "info"
+                end
+            end
+        end
+
         res = @dog.emit_event(Dogapi::Event.new(
             "#{record}",
             :msg_title => msg_title,
@@ -67,7 +92,7 @@ module Fluent::Plugin
             :priority => @priority,
             :host => host,
             :tags => tags,
-            :alert_type => @alert_type,
+            :alert_type => alert_type,
             :aggregation_key => @aggregation_key,
             :source_type_name => @source_type_name
         ))
